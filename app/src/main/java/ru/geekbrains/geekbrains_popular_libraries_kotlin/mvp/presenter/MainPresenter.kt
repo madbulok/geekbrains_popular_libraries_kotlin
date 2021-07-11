@@ -1,20 +1,18 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter
 
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.CountersModel
+import com.github.terrakok.cicerone.Router
+import moxy.MvpPresenter
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.navigation.IScreens
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.MainView
-import java.io.Serializable
 
+class MainPresenter(val router: Router, val screens: IScreens) : MvpPresenter<MainView>() {
 
-class MainPresenter(private val view: MainView) : Serializable {
-
-    private val model = CountersModel()
-
-    fun addButton(id: Int){
-        model.addButtonId(id)
+    override fun onFirstViewAttach() {
+        super.onFirstViewAttach()
+        router.replaceScreen(screens.users())
     }
 
-    fun counterButtonClick(id: Int) {
-        val nextValue = model.next(id)
-        view.setButtonText(id, nextValue.toString())
+    fun backClick() {
+        router.exit()
     }
 }
