@@ -5,7 +5,7 @@ import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.navigation.IScreens
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.MainView
 
-class MainPresenter(val router: Router, val screens: IScreens) : MvpPresenter<MainView>() {
+class MainPresenter(private val router: Router, val screens: IScreens) : MvpPresenter<MainView>() {
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()

@@ -14,7 +14,7 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.navigation.AndroidSc
 
 class MainActivity : MvpAppCompatActivity(), MainView {
 
-    val navigator = AppNavigator(this, R.id.container)
+    private val navigator = AppNavigator(this, R.id.container)
 
     private var vb: ActivityMainBinding? = null
 
@@ -39,7 +39,6 @@ class MainActivity : MvpAppCompatActivity(), MainView {
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         supportFragmentManager.fragments.forEach {
             if(it is BackButtonListener && it.backPressed()){
                 return
@@ -47,6 +46,4 @@ class MainActivity : MvpAppCompatActivity(), MainView {
         }
         presenter.backClick()
     }
-
-
 }
