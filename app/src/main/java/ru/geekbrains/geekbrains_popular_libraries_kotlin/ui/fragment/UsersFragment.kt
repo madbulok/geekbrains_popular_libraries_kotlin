@@ -3,7 +3,9 @@ package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.fragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.databinding.FragmentUsersBinding
@@ -26,7 +28,8 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
         UsersPresenter(
             GithubUsersRepo(),
             App.instance.router,
-            AndroidScreens()
+            AndroidScreens(),
+            AndroidSchedulers.mainThread()
         )
     }
     private var adapter: UsersRVAdapter? = null
@@ -52,6 +55,10 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
 
     override fun updateList() {
         adapter?.notifyDataSetChanged()
+    }
+
+    override fun showErrorMessage(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun backPressed() = presenter.backClick()
