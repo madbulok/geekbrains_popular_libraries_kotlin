@@ -4,6 +4,7 @@ import android.widget.Toast
 import com.github.terrakok.cicerone.Router
 import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.Schedulers
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
@@ -49,6 +50,7 @@ class UsersPresenter(
         usersListPresenter.users.clear()
         usersRepo.getUsers()
             .observeOn(scheduler)
+            .subscribeOn(Schedulers.newThread())
             .subscribe({users->
                 usersListPresenter.users.addAll(users)
                 viewState.updateList()
