@@ -1,6 +1,9 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter
 
+import android.widget.Toast
 import com.github.terrakok.cicerone.Router
+import io.reactivex.rxjava3.annotations.NonNull
+import io.reactivex.rxjava3.core.Scheduler
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
@@ -9,7 +12,12 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.list.IUse
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.UserItemView
 
-class UsersPresenter(private val usersRepo: GithubUsersRepo, private val router: Router, val screens: IScreens) :
+class UsersPresenter(
+    private val usersRepo: GithubUsersRepo,
+    private val router: Router,
+    val screens: IScreens,
+    private val scheduler: @NonNull Scheduler
+) :
     MvpPresenter<UsersView>() {
 
     class UsersListPresenter : IUserListPresenter {
@@ -38,10 +46,15 @@ class UsersPresenter(private val usersRepo: GithubUsersRepo, private val router:
     }
 
     private fun loadData() {
-        val users = usersRepo.getUsers()
         usersListPresenter.users.clear()
-        usersListPresenter.users.addAll(users)
-        viewState.updateList()
+        usersRepo.getUsers()
+            .observeOn(scheduler)
+            .subscribe({users->
+                usersListPresenter.users.addAll(users)
+                viewState.updateList()
+            }, {
+                viewState.showErrorMessage(it.message!!)
+            })
     }
 
     fun backClick(): Boolean {
