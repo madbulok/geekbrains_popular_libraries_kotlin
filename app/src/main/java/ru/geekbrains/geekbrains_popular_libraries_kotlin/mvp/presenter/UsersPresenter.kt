@@ -1,10 +1,7 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter
 
-import android.widget.Toast
 import com.github.terrakok.cicerone.Router
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Scheduler
-import io.reactivex.rxjava3.schedulers.Schedulers
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
@@ -17,7 +14,7 @@ class UsersPresenter(
     private val usersRepo: GithubUsersRepo,
     private val router: Router,
     val screens: IScreens,
-    private val scheduler: @NonNull Scheduler
+    val uiScheduler: Scheduler,
 ) :
     MvpPresenter<UsersView>() {
 
@@ -27,7 +24,8 @@ class UsersPresenter(
 
         override fun bindView(view: UserItemView) {
             val user = users[view.pos]
-            view.setLogin(user.login)
+            user.login?.let { view.setLogin(it) }
+            user.avatarUrl?.let { view.loadAvatar(it) }
         }
 
         override fun getCount() = users.size
@@ -47,15 +45,14 @@ class UsersPresenter(
     }
 
     private fun loadData() {
-        usersListPresenter.users.clear()
         usersRepo.getUsers()
-            .observeOn(scheduler)
-            .subscribeOn(Schedulers.newThread())
-            .subscribe({users->
+            .observeOn(uiScheduler)
+            .subscribe({ users ->
+                usersListPresenter.users.clear()
                 usersListPresenter.users.addAll(users)
                 viewState.updateList()
             }, {
-                viewState.showErrorMessage(it.message!!)
+                println("Error: ${it.message}")
             })
     }
 

@@ -1,4 +1,4 @@
-package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.activity
+package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
