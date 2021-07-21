@@ -15,8 +15,16 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.BackButtonListener
 class UserFragment : MvpAppCompatFragment(), UserView, BackButtonListener {
 
     private val presenter by moxyPresenter {
-        UserPresenter(App.instance.router, arguments?.getParcelable("userKey"))
+        UserPresenter(
+            GithubUsersRepo(ApiHolder.api),
+            App.instance.router,
+            arguments?.getParcelable("userKey"),
+            AndroidSchedulers.mainThread()
+        )
     }
+
+    private var adapterRepos: ReposRVAdapter? = null
+
     private var _viewBinding: UserContentLayoutBinding? = null
 
     companion object {
@@ -39,6 +47,31 @@ class UserFragment : MvpAppCompatFragment(), UserView, BackButtonListener {
 
     override fun loadUser(user: GithubUser) {
         _viewBinding?.textView?.text = user.login
+    }
+
+    override fun init() {
+        adapterRepos = ReposRVAdapter(presenter.reposPresenterList)
+        _viewBinding?.rvRepositories?.adapter = adapterRepos
+
+    }
+
+    override fun startLoading() {
+        _viewBinding?.progressBar?.visibility = View.VISIBLE
+        _viewBinding?.rvRepositories?.visibility = View.GONE
+    }
+
+    override fun stopLoading() {
+        _viewBinding?.progressBar?.visibility = View.GONE
+        _viewBinding?.rvRepositories?.visibility = View.VISIBLE
+    }
+
+    override fun updateList() {
+        adapterRepos?.notifyDataSetChanged()
+        Log.e(javaClass.simpleName, "LOAD OK!")
+    }
+
+    override fun showError(message: String) {
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroyView() {

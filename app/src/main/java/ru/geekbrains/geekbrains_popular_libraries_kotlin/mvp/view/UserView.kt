@@ -7,4 +7,9 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.Github
 @AddToEndSingle
 interface UserView : MvpView {
     fun loadUser(user: GithubUser)
+    fun init()
+    fun startLoading()
+    fun stopLoading()
+    fun updateList()
+    fun showError(message: String)
 }
