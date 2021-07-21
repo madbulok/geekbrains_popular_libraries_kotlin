@@ -1,5 +1,7 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity
 
+import com.google.gson.annotations.Expose
+
 data class ReposItem(
     val archive_url: String?,
     val archived: Boolean?,
@@ -49,7 +51,7 @@ data class ReposItem(
     val merges_url: String?,
     val milestones_url: String?,
     val mirror_url: Any?,
-    val name: String?,
+    @Expose val name: String?,
     val node_id: String?,
     val notifications_url: String?,
     val open_issues: Int?,
