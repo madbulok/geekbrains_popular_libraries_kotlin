@@ -1,9 +1,10 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 @Entity
 data class CachedImage(
-    val url:String,
+    @PrimaryKey val url:String,
     val imagePath: String
 )

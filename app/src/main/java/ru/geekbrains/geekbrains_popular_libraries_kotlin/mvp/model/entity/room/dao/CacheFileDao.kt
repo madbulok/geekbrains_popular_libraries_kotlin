@@ -7,13 +7,13 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image.CachedI
 @Dao
 interface CacheFileDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(image: CachedImage)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(vararg image: CachedImage)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(image: List<CachedImage>)
 
     @Delete
@@ -37,7 +37,7 @@ interface CacheFileDao {
     @Query("SELECT * FROM CachedImage")
     fun getAllImage() : List<CachedImage>
 
-    @Query("SELECT * FROM CachedImage WHERE url=:url")
+    @Query("SELECT * FROM CachedImage WHERE url=:url LIMIT 1")
     fun getImageByUrl(url: String) : Maybe<CachedImage>
 
 }

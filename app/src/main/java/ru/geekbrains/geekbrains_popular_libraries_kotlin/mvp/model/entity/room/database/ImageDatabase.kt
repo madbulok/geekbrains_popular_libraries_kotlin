@@ -12,7 +12,8 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image.CachedI
     entities = [
         CachedImage::class
     ],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class ImageDatabase : RoomDatabase() {
 
