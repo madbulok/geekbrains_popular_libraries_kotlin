@@ -3,6 +3,7 @@ package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui
 import android.app.Application
 import com.github.terrakok.cicerone.Cicerone
 import com.github.terrakok.cicerone.Router
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.LocalDatabase
 
 class App : Application() {
 
@@ -20,5 +21,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
+        LocalDatabase.create(applicationContext)
     }
 }

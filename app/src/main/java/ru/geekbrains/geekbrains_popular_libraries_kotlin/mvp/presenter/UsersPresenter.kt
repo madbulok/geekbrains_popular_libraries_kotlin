@@ -1,6 +1,7 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter
 
 import com.github.terrakok.cicerone.Router
+import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Scheduler
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
@@ -14,7 +15,7 @@ class UsersPresenter(
     private val usersRepo: GithubUsersRepo,
     private val router: Router,
     val screens: IScreens,
-    val uiScheduler: Scheduler,
+    private val scheduler: @NonNull Scheduler
 ) :
     MvpPresenter<UsersView>() {
 
@@ -46,7 +47,7 @@ class UsersPresenter(
 
     private fun loadData() {
         usersRepo.getUsers()
-            .observeOn(uiScheduler)
+            .observeOn(scheduler)
             .subscribe({ users ->
                 usersListPresenter.users.clear()
                 usersListPresenter.users.addAll(users)

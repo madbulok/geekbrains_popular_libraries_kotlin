@@ -1,25 +1,41 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.databinding.UserContentLayoutBinding
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.api.ApiHolder
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.LocalDatabase
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.UserPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UserView
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.App
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.BackButtonListener
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.adapter.ReposRVAdapter
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.navigation.AndroidScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.network.AndroidNetworkStatus
 
 class UserFragment : MvpAppCompatFragment(), UserView, BackButtonListener {
 
     private val presenter by moxyPresenter {
         UserPresenter(
-            GithubUsersRepo(ApiHolder.api),
+            GithubUsersRepo(
+                ApiHolder.api,
+                LocalDatabase.getInstance().userDao,
+                LocalDatabase.getInstance().repositoryDao,
+                AndroidNetworkStatus(requireContext())
+            ),
             App.instance.router,
             arguments?.getParcelable("userKey"),
-            AndroidSchedulers.mainThread()
+            AndroidSchedulers.mainThread(),
+            AndroidScreens()
         )
     }
 

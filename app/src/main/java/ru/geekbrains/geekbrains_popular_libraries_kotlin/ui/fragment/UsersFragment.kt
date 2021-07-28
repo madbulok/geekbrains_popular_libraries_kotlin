@@ -10,6 +10,7 @@ import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.databinding.FragmentUsersBinding
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.api.ApiHolder
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.LocalDatabase
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.UsersPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
@@ -18,6 +19,7 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.BackButtonListener
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.adapter.UsersRVAdapter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.image.GlideImageLoader
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.navigation.AndroidScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.network.AndroidNetworkStatus
 
 class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, BackButtonListener {
 
@@ -28,7 +30,12 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
     private var vb: FragmentUsersBinding? = null
     private val presenter by moxyPresenter {
         UsersPresenter(
-            GithubUsersRepo(ApiHolder.api),
+            GithubUsersRepo(
+                ApiHolder.api,
+                LocalDatabase.getInstance().userDao,
+                LocalDatabase.getInstance().repositoryDao,
+                AndroidNetworkStatus(requireContext())
+            ),
             App.instance.router,
             AndroidScreens(),
             AndroidSchedulers.mainThread()
