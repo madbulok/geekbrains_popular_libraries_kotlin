@@ -10,7 +10,9 @@ import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.databinding.FragmentUsersBinding
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.api.ApiHolder
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.ImageDatabase
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.LocalDatabase
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image.AndroidConverter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.UsersPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
@@ -58,7 +60,14 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
 
     override fun init() {
         vb?.rvUsers?.layoutManager = LinearLayoutManager(requireActivity())
-        adapter = UsersRVAdapter(presenter.usersListPresenter, GlideImageLoader())
+        adapter = UsersRVAdapter(
+            presenter.usersListPresenter,
+            GlideImageLoader(
+                ImageDatabase.getInstance().imageDao,
+                AndroidConverter(AndroidSchedulers.mainThread()),
+                AndroidSchedulers.mainThread()
+            )
+        )
         vb?.rvUsers?.adapter = adapter
     }
 
