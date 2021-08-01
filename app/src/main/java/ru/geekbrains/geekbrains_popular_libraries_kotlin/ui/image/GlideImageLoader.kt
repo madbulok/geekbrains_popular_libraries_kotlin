@@ -11,9 +11,19 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.cache.IImageCache
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image.IImageLoader
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.network.INetworkStatus
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.App
 import java.io.ByteArrayOutputStream
+import javax.inject.Inject
 
-class GlideImageLoader(val cache: IImageCache, val networkStatus: INetworkStatus) : IImageLoader<ImageView> {
+class GlideImageLoader : IImageLoader<ImageView> {
+
+    @Inject lateinit var networkStatus: INetworkStatus
+    @Inject lateinit var cache: IImageCache
+
+    init {
+        App.instance.appComponent.inject(this)
+    }
+
     override fun loadInto(url: String, container: ImageView) {
         networkStatus.isOnlineSingle()
             .observeOn(AndroidSchedulers.mainThread())

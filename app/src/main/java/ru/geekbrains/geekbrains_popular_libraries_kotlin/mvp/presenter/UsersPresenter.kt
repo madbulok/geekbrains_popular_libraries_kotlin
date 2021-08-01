@@ -9,6 +9,7 @@ import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.IGithubU
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.list.IUserListPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.UserItemView
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.App
 import javax.inject.Inject
 
 class UsersPresenter(val uiScheduler: Scheduler) : MvpPresenter<UsersView>() {
@@ -34,6 +35,7 @@ class UsersPresenter(val uiScheduler: Scheduler) : MvpPresenter<UsersView>() {
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
+        App.instance.appComponent.inject(this)
         viewState.init()
         loadData()
 
