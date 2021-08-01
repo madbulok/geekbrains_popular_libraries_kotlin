@@ -10,13 +10,11 @@ import androidx.room.PrimaryKey
         parentColumns = ["id"],
         childColumns = ["userId"],
         onDelete = ForeignKey.CASCADE
-    )
-
-    ]
+    )]
 )
 data class RoomGithubRepository(
     @PrimaryKey var id: String,
     var name: String,
-    var forksCount: String,
+    var forksCount: Int,
     var userId: String
 )

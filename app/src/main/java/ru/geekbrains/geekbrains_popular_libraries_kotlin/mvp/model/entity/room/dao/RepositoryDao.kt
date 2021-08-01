@@ -1,44 +1,45 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.RoomGithubRepository
 
 @Dao
 interface RepositoryDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(repository: RoomGithubRepository)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(user: RoomGithubRepository)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(vararg repositories: RoomGithubRepository)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(vararg users: RoomGithubRepository)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(repository: List<RoomGithubRepository>)
-
-
-    @Update
-    fun update(repository: RoomGithubRepository)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(users: List<RoomGithubRepository>)
 
     @Update
-    fun update(vararg repositories: RoomGithubRepository)
+    fun update(user: RoomGithubRepository)
 
     @Update
-    fun update(repository: List<RoomGithubRepository>)
+    fun update(vararg users: RoomGithubRepository)
 
-
-    @Delete
-    fun delete(repository: RoomGithubRepository)
-
-    @Delete
-    fun delete(vararg repositories: RoomGithubRepository)
+    @Update
+    fun update(users: List<RoomGithubRepository>)
 
     @Delete
-    fun delete(repository: List<RoomGithubRepository>)
+    fun delete(user: RoomGithubRepository)
 
+    @Delete
+    fun delete(vararg users: RoomGithubRepository)
+
+    @Delete
+    fun delete(users: List<RoomGithubRepository>)
 
     @Query("SELECT * FROM RoomGithubRepository")
-    fun getAll() : List<RoomGithubRepository>
+    fun getAll(): List<RoomGithubRepository>
 
-
-    @Query("SELECT * FROM RoomGithubRepository WHERE userId=:userID")
-    fun findByLogin(userID: String) : List<RoomGithubRepository>
+    @Query("SELECT * FROM RoomGithubRepository WHERE userId = :userId")
+    fun findForUser(userId: String): List<RoomGithubRepository>
 }
