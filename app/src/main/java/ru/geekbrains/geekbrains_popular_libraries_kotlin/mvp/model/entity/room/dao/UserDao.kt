@@ -1,19 +1,23 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.RoomGithubUser
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(user: RoomGithubUser)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(vararg users: RoomGithubUser)
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(user: List<RoomGithubUser>)
-
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(users: List<RoomGithubUser>)
 
     @Update
     fun update(user: RoomGithubUser)
@@ -22,8 +26,7 @@ interface UserDao {
     fun update(vararg users: RoomGithubUser)
 
     @Update
-    fun update(user: List<RoomGithubUser>)
-
+    fun update(users: List<RoomGithubUser>)
 
     @Delete
     fun delete(user: RoomGithubUser)
@@ -32,13 +35,11 @@ interface UserDao {
     fun delete(vararg users: RoomGithubUser)
 
     @Delete
-    fun delete(user: List<RoomGithubUser>)
-
+    fun delete(users: List<RoomGithubUser>)
 
     @Query("SELECT * FROM RoomGithubUser")
-    fun getAll() : List<RoomGithubUser>
+    fun getAll(): List<RoomGithubUser>
 
-
-    @Query("SELECT * FROM RoomGithubUser WHERE login=:login LIMIT 1")
-    fun findByLogin(login: String) : RoomGithubUser
+    @Query("SELECT * FROM RoomGithubUser WHERE login = :login LIMIT 1")
+    fun findByLogin(login: String): RoomGithubUser?
 }

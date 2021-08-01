@@ -5,70 +5,52 @@ import io.reactivex.rxjava3.core.Scheduler
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubRepository
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.ReposItem
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.navigation.IScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.navigation.IScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.IGithubRepositoriesRepo
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.list.IRepositoryListPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UserView
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.IReposListPresenter
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.RepoItemView
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.RepositoryItemView
 
-class UserPresenter(
-    private val usersRepo: GithubUsersRepo,
-    private val router: Router,
-    val githubUser: GithubUser?,
-    private val scheduler: Scheduler,
-    val screens: IScreens
-) : MvpPresenter<UserView>() {
-    class RepoListPresenter : IReposListPresenter {
-        private val repos = mutableListOf<GithubRepository>()
-        override var itemClickListener: ((RepoItemView) -> Unit)? = null
+class UserPresenter(val uiScheduler: Scheduler, val repositoriesRepo: IGithubRepositoriesRepo, val router: Router, val user: GithubUser, val screens: IScreens) : MvpPresenter<UserView>() {
 
-        override fun bindView(view: RepoItemView) {
-            val repo = repos[view.pos]
-            repo.name.let { view.setName(it) }
+    class RepositoriesListPresenter : IRepositoryListPresenter {
+        val repositories = mutableListOf<GithubRepository>()
+        override var itemClickListener: ((RepositoryItemView) -> Unit)? = null
+        override fun getCount() = repositories.size
+
+        override fun bindView(view: RepositoryItemView) {
+            val repository = repositories[view.pos]
+            repository.name?.let { view.setName(it) }
         }
-
-        override fun getCount(): Int = repos.size
-
-        fun clearLoadedRepositories() = repos.clear()
-        fun addRepositories(repositories: List<GithubRepository>) {
-            repos.addAll(repositories)
-        }
-
-        fun getRepo(pos: Int) = repos[pos]
     }
 
-    val reposPresenterList = RepoListPresenter()
+    val repositoriesListPresenter = RepositoriesListPresenter()
 
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
-        if (githubUser == null) return
-        reposPresenterList.itemClickListener = {
-            val reposItem = reposPresenterList.getRepo(it.pos)
-            router.navigateTo(screen = screens.openRepositoryInfo(reposItem.name))
-        }
         viewState.init()
-        viewState.loadUser(githubUser)
-        loadRepositories()
+        loadData()
+
+        repositoriesListPresenter.itemClickListener = { itemView ->
+            val repository = repositoriesListPresenter.repositories[itemView.pos]
+            router.navigateTo(screens.repository(repository))
+        }
     }
 
-    fun backClick(): Boolean {
+    fun loadData() {
+        repositoriesRepo.getRepositories(user)
+            .observeOn(uiScheduler)
+            .subscribe({ repositories ->
+                repositoriesListPresenter.repositories.clear()
+                repositoriesListPresenter.repositories.addAll(repositories)
+                viewState.updateList()
+            }, {
+                println("Error: ${it.message}")
+            })
+    }
+
+    fun backPressed(): Boolean {
         router.exit()
         return true
-    }
-
-    private fun loadRepositories() {
-        viewState.startLoading()
-        usersRepo.getRepositories(githubUser!!)
-            .observeOn(scheduler)
-            .subscribe({ repos ->
-                reposPresenterList.clearLoadedRepositories()
-                reposPresenterList.addRepositories(repos)
-                viewState.updateList()
-                viewState.stopLoading()
-            }, {
-                viewState.showError(it.message ?: "Unknown error")
-                viewState.stopLoading()
-            })
     }
 }

@@ -5,15 +5,11 @@ import retrofit2.http.GET
 import retrofit2.http.Url
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubRepository
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.ReposItem
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.RoomGithubRepository
 
 interface IDataSource {
-
-    @GET("users")
+    @GET("/users")
     fun getUsers(): Single<List<GithubUser>>
 
     @GET
-    fun userRepositories(@Url url: String) : Single<List<GithubRepository>>
-
+    fun getRepositories(@Url url: String): Single<List<GithubRepository>>
 }

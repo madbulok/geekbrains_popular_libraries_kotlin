@@ -2,56 +2,53 @@ package ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
+
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.databinding.FragmentUsersBinding
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.api.ApiHolder
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.ImageDatabase
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.database.LocalDatabase
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.image.AndroidConverter
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.cache.room.RoomImageCache
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.room.db.Database
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.UsersPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.App
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.BackButtonListener
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.adapter.UsersRVAdapter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.image.GlideImageLoader
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.navigation.AndroidScreens
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.ui.network.AndroidNetworkStatus
+import javax.inject.Inject
 
-class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, BackButtonListener {
+class UsersFragment : MvpAppCompatFragment(), UsersView, BackButtonListener {
+
+    @Inject
+    lateinit var database: Database
+
 
     companion object {
-        fun getInstance() = UsersFragment()
+        fun newInstance() = UsersFragment().apply {
+            App.instance.appComponent.inject(this)
+        }
     }
 
-    private var vb: FragmentUsersBinding? = null
-    private val presenter by moxyPresenter {
-        UsersPresenter(
-            GithubUsersRepo(
-                ApiHolder.api,
-                LocalDatabase.getInstance().userDao,
-                LocalDatabase.getInstance().repositoryDao,
-                AndroidNetworkStatus(requireContext())
-            ),
-            App.instance.router,
-            AndroidScreens(),
-            AndroidSchedulers.mainThread()
-        )
+    val presenter: UsersPresenter by moxyPresenter {
+        UsersPresenter(AndroidSchedulers.mainThread()).apply {
+            App.instance.appComponent.inject(this)
+        }
     }
-    private var adapter: UsersRVAdapter? = null
+
+    var adapter: UsersRVAdapter? = null
+    private var vb: FragmentUsersBinding? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ) = FragmentUsersBinding.inflate(inflater, container, false).also {
-        vb = it
-    }.root
+    ) =
+        FragmentUsersBinding.inflate(inflater, container, false).also {
+            vb = it
+        }.root
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -59,13 +56,12 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
     }
 
     override fun init() {
-        vb?.rvUsers?.layoutManager = LinearLayoutManager(requireActivity())
+        vb?.rvUsers?.layoutManager = LinearLayoutManager(context)
         adapter = UsersRVAdapter(
             presenter.usersListPresenter,
             GlideImageLoader(
-                ImageDatabase.getInstance().imageDao,
-                AndroidConverter(AndroidSchedulers.mainThread()),
-                AndroidSchedulers.mainThread()
+                RoomImageCache(database, App.instance.cacheDir),
+                AndroidNetworkStatus(requireContext())
             )
         )
         vb?.rvUsers?.adapter = adapter
@@ -75,9 +71,5 @@ class UsersFragment private constructor() : MvpAppCompatFragment(), UsersView, B
         adapter?.notifyDataSetChanged()
     }
 
-    override fun showErrorMessage(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
-    override fun backPressed() = presenter.backClick()
+    override fun backPressed() = presenter.backPressed()
 }

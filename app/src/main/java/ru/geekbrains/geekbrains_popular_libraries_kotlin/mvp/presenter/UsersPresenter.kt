@@ -1,35 +1,33 @@
 package ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter
 
 import com.github.terrakok.cicerone.Router
-import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Scheduler
 import moxy.MvpPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.entity.GithubUser
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.GithubUsersRepo
-import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.navigation.IScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.navigation.IScreens
+import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.model.repo.IGithubUsersRepo
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.presenter.list.IUserListPresenter
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.UsersView
 import ru.geekbrains.geekbrains_popular_libraries_kotlin.mvp.view.list.UserItemView
+import javax.inject.Inject
 
-class UsersPresenter(
-    private val usersRepo: GithubUsersRepo,
-    private val router: Router,
-    val screens: IScreens,
-    private val scheduler: @NonNull Scheduler
-) :
-    MvpPresenter<UsersView>() {
+class UsersPresenter(val uiScheduler: Scheduler) : MvpPresenter<UsersView>() {
+
+    @Inject lateinit var router: Router
+    @Inject lateinit var screens: IScreens
+    @Inject lateinit var usersRepo: IGithubUsersRepo
 
     class UsersListPresenter : IUserListPresenter {
         val users = mutableListOf<GithubUser>()
         override var itemClickListener: ((UserItemView) -> Unit)? = null
 
+        override fun getCount() = users.size
+
         override fun bindView(view: UserItemView) {
             val user = users[view.pos]
             user.login?.let { view.setLogin(it) }
-            user.avatarUrl?.let { view.loadAvatar(it) }
+            user.avatarUrl?.let {view.loadAvatar(it)}
         }
-
-        override fun getCount() = users.size
     }
 
     val usersListPresenter = UsersListPresenter()
@@ -39,25 +37,25 @@ class UsersPresenter(
         viewState.init()
         loadData()
 
-        usersListPresenter.itemClickListener = { userSelected ->
-            val user = usersListPresenter.users[userSelected.pos]
-            router.navigateTo(screen = screens.user(user))
+        usersListPresenter.itemClickListener = { itemView ->
+            val user = usersListPresenter.users[itemView.pos]
+            router.navigateTo(screens.user(user))
         }
     }
 
-    private fun loadData() {
+    fun loadData() {
         usersRepo.getUsers()
-            .observeOn(scheduler)
-            .subscribe({ users ->
+            .observeOn(uiScheduler)
+            .subscribe({ repos ->
                 usersListPresenter.users.clear()
-                usersListPresenter.users.addAll(users)
+                usersListPresenter.users.addAll(repos)
                 viewState.updateList()
             }, {
                 println("Error: ${it.message}")
             })
     }
 
-    fun backClick(): Boolean {
+    fun backPressed(): Boolean {
         router.exit()
         return true
     }
