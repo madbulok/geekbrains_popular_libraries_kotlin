@@ -22,23 +22,15 @@ import javax.inject.Inject
 
 class UsersFragment : MvpAppCompatFragment(), UsersView, BackButtonListener {
 
-    @Inject
-    lateinit var database: Database
-
-
     companion object {
-        fun newInstance() = UsersFragment().apply {
-            App.instance.appComponent.inject(this)
-        }
+        fun newInstance() = UsersFragment()
     }
 
     val presenter: UsersPresenter by moxyPresenter {
-        UsersPresenter(AndroidSchedulers.mainThread()).apply {
-            App.instance.appComponent.inject(this)
-        }
+        UsersPresenter(AndroidSchedulers.mainThread())
     }
 
-    var adapter: UsersRVAdapter? = null
+    private var adapter: UsersRVAdapter? = null
     private var vb: FragmentUsersBinding? = null
 
     override fun onCreateView(
@@ -59,10 +51,6 @@ class UsersFragment : MvpAppCompatFragment(), UsersView, BackButtonListener {
         vb?.rvUsers?.layoutManager = LinearLayoutManager(context)
         adapter = UsersRVAdapter(
             presenter.usersListPresenter,
-            GlideImageLoader(
-                RoomImageCache(database, App.instance.cacheDir),
-                AndroidNetworkStatus(requireContext())
-            )
         )
         vb?.rvUsers?.adapter = adapter
     }
